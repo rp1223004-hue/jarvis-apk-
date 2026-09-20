@@ -1,18 +1,33 @@
-[app]
-title = JARVIS AI
-package.name = jarvisai
-package.domain = com.boss.jarvisai
-source.dir =.
-source.include_exts = py,png,jpg,kv,atlas
-version = 1.0
-requirements = python3,kivy==2.3.0
-orientation = portrait
-fullscreen = 0
-android.permissions = INTERNET,RECORD_AUDIO
-android.api = 33
-android.minapi = 21
-android.accept_sdk_license_agreement = True
+name: Build JARVIS APK
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
-[buildozer]
-log_level = 2
-warn_on_root = 1
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip zip unzip openjdk-17-jdk
+          pip install --upgrade pip
+          pip install buildozer cython
+
+      - name: Build APK
+        run: |
+          buildozer android debug
+          
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: JARVIS-APK
+          path: bin/*.apk
